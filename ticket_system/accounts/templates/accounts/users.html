@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}
+Управление пользователями
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white">Управление пользователями</h2>
+<a href="{% url 'add_user' %}" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-3" style="max-width: 250px; height: 40px; background-color: rgb(174, 253, 227);">Добавить пользователя</a>
+<div class="ap-2 p-3 small rounded-4 shadow mt-3 bg-white">
+    <table class="table mt-3">
+        <thead>
+            <tr>
+                <th>Электронная почта</th>
+                <th>Имя</th>
+                <th>Фамилия</th>
+                <th>Роль</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.email }}</td>
+                <td>{{ user.first_name }}</td>
+                <td>{{ user.last_name }}</td>
+                <td>{{ user.get_role_display }}</td>
+                <td>
+                    <a href="{% url 'edit_user' user.id %}" class="btn btn-primary btn-sm rounded-5 shadow-sm">Редактировать</a>
+                    <!-- Кнопка для удаления -->
+                    <button 
+                        type="button" 
+                        class="btn btn-danger btn-sm rounded-5 shadow-sm" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deleteModal{{ user.id }}">
+                        Удалить
+                    </button>
+                    
+                    <!-- Модальное окно -->
+                    <div 
+                        class="modal fade" 
+                        id="deleteModal{{ user.id }}" 
+                        tabindex="-1" 
+                        aria-labelledby="deleteModalLabel{{ user.id }}" 
+                        aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel{{ user.id }}">Подтверждение удаления</h5>
+                                    <button 
+                                        type="button" 
+                                        class="btn-close" 
+                                        data-bs-dismiss="modal" 
+                                        aria-label="Закрыть"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Вы уверены, что хотите удалить пользователя <strong>{{ user.email }}</strong>?
+                                </div>
+                                <div class="modal-footer">
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-secondary rounded-5" 
+                                        data-bs-dismiss="modal">Отмена</button>
+                                    <form 
+                                        action="{% url 'delete_user' user.id %}" 
+                                        method="post" 
+                                        class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger rounded-5">Удалить</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

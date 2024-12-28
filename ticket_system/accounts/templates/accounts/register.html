@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center flex-column">
+  <h2 class="text-center text-white">Регистрация</h2>
+  <form id="registrationForm" method="post">
+    {% csrf_token %}
+    <div class="mt-2 ap-2 p-4 small rounded-4 shadow" style="min-width: 400px; background-color: rgb(243, 249, 255);">
+      <!-- Поле Email -->
+      <div class="form-group mb-3">
+        <label for="id_email">Электронная почта</label>
+        <span id="emailWarning" class="text-danger" style="display: none;">Введите корректный адрес электронной почты.</span>
+        {{ form.email|add_class:"form-control" }}
+      </div>
+      <!-- Поле Имя -->
+      <div class="form-group mb-3">
+        <label for="id_first_name">Имя</label>
+        <span id="firstNameWarning" class="text-danger" style="display: none;">Имя не должно превышать 25 символов.</span>
+        {{ form.first_name|add_class:"form-control" }}
+      </div>
+      <!-- Поле Фамилия -->
+      <div class="form-group mb-3">
+        <label for="id_last_name">Фамилия</label>
+        <span id="lastNameWarning" class="text-danger" style="display: none;">Фамилия не должна превышать 30 символов.</span>
+        {{ form.last_name|add_class:"form-control" }}
+      </div>
+      <!-- Поле Пароль -->
+      <div class="form-group mb-3">
+        <label for="id_password1">Пароль</label>
+        <span id="password1Warning" class="text-danger" style="display: none;">Пароль должен быть не менее 8 символов.</span>
+        {{ form.password1|add_class:"form-control" }}
+      </div>
+      <!-- Подтверждение пароля -->
+      <div class="form-group mb-3">
+        <label for="id_password2">Подтверждение пароля</label>
+        <span id="password2Warning" class="text-danger" style="display: none;">Пароли должны совпадать.</span>
+        {{ form.password2|add_class:"form-control" }}
+      </div>
+    </div>
+    <div class="d-flex flex-column gap-3 mt-3" style="margin: auto;">
+      <button id="registerButton" type="submit" class="btn rounded-5 shadow-sm button-disabled_style" disabled style="background-color: #aefde3">Зарегистрироваться</button>
+      <a href="{% url 'login' %}" class="btn rounded-5 shadow-sm bg-light" style="height: 40px;">Назад</a>
+    </div>
+  </form>
+</div>
+
+<style>
+  .button-disabled_style {
+    background-color: #d3d3d3 !important; /* Цвет фона для неактивного состояния */
+    color: #929292 !important; /* Цвет текста для неактивного состояния */
+    cursor: not-allowed; /* Курсор для неактивного состояния */
+  }
+</style>
+
+<script>
+  const emailInput = document.getElementById('id_email');
+  const firstNameInput = document.getElementById('id_first_name');
+  const lastNameInput = document.getElementById('id_last_name');
+  const password1Input = document.getElementById('id_password1');
+  const password2Input = document.getElementById('id_password2');
+  const registerButton = document.getElementById('registerButton');
+
+  function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  function validateForm() {
+    const isEmailValid = validateEmail(emailInput.value);
+    const isFirstNameValid = firstNameInput.value.length > 0 && firstNameInput.value.length <= 25;
+    const isLastNameValid = lastNameInput.value.length > 0 && lastNameInput.value.length <= 30;
+    const isPassword1Valid = password1Input.value.length >= 8;
+    const isPassword2Valid = password1Input.value === password2Input.value;
+
+    registerButton.disabled = !(isEmailValid && isFirstNameValid && isLastNameValid && isPassword1Valid && isPassword2Valid);
+    registerButton.classList.toggle('button-disabled_style', registerButton.disabled);
+  }
+
+  function setupValidation(input, validator, warningElement) {
+    input.addEventListener('input', () => {
+      if (validator(input.value)) {
+        input.classList.remove('is-invalid');
+        warningElement.style.display = 'none';
+      } else {
+        input.classList.add('is-invalid');
+        warningElement.style.display = 'block';
+      }
+      validateForm();
+    });
+  }
+
+  // Установка валидаторов
+  setupValidation(emailInput, validateEmail, document.getElementById('emailWarning'));
+  setupValidation(firstNameInput, (value) => value.length > 0 && value.length <= 25, document.getElementById('firstNameWarning'));
+  setupValidation(lastNameInput, (value) => value.length > 0 && value.length <= 30, document.getElementById('lastNameWarning'));
+  setupValidation(password1Input, (value) => value.length >= 8, document.getElementById('password1Warning'));
+  password2Input.addEventListener('input', () => {
+    const isPassword2Valid = password1Input.value === password2Input.value;
+    password2Input.classList.toggle('is-invalid', !isPassword2Valid);
+    document.getElementById('password2Warning').style.display = isPassword2Valid ? 'none' : 'block';
+    validateForm();
+  });
+</script>
+{% endblock %}

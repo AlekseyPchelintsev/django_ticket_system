@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+Создать тикет
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white">Создать тикет</h2>
+
+<div class="d-flex gap-3">
+    <button id="submitButton" form="ticket-form" type="submit" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3 button-disabled_style" style="max-width: 250px; height: 40px; background-color: rgb(174, 253, 227)" disabled>
+        Сохранить
+    </button>
+    <a href="{% url 'ticket_list' %}" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3 bg-light" style="max-width: 250px; height: 40px;">
+        Назад
+    </a>
+</div>
+
+<div class="p-4 small rounded-5 shadow mt-3" style="max-width: 400px; background-color: rgb(243, 249, 255);">
+    <form id="ticket-form" method="post">
+        {% csrf_token %}
+        <div class="form-group mb-3">
+            <label for="id_name">Название</label>
+            <span id="nameWarning" class="text-danger" style="display: none;">Название не должно превышать длину в 45 символов!</span>
+            {{ form.name|add_class:"form-control" }}
+        </div>
+        <div class="form-group mb-3">
+            <label for="id_description">Краткое описание</label>
+            <span class="small text-muted">(не более 80 символов)</span>
+            <span id="descriptionWarning" class="text-danger" style="display: none;">Длина превышает 80 символов!</span>
+            {{ form.description|add_class:"form-control" }}
+        </div>
+    </form>
+</div>
+
+<style>
+    .button-disabled_style {
+        background-color: #d3d3d3 !important; /* Цвет фона для неактивного состояния */
+        color: #929292 !important; /* Цвет текста для неактивного состояния */
+        cursor: not-allowed; /* Курсор для неактивного состояния */
+    }
+</style>
+
+<script>
+    const nameInput = document.getElementById('id_name');
+    const nameWarning = document.getElementById('nameWarning');
+    const descriptionInput = document.getElementById('id_description');
+    const descriptionWarning = document.getElementById('descriptionWarning');
+    const submitButton = document.getElementById('submitButton');
+
+    function validateForm() {
+        const isNameValid = nameInput.value.length > 0 && nameInput.value.length <= 45;
+        const isDescriptionValid = descriptionInput.value.length > 0 && descriptionInput.value.length <= 80;
+
+        // Условие для активации кнопки
+        if (isNameValid) {
+            submitButton.disabled = false;
+            submitButton.classList.remove('button-disabled_style'); // Убираем класс для активного состояния
+        } else {
+            submitButton.disabled = true;
+            submitButton.classList.add('button-disabled_style'); // Добавляем класс для неактивного состояния
+        }
+    }
+
+    // Проверка для поля "Название"
+    nameInput.addEventListener('input', function() {
+        const maxLength = 45;
+        if (nameInput.value.length > maxLength) {
+            nameInput.classList.add('is-invalid');  // Добавляем класс для красной рамки
+            nameWarning.style.display = 'block';  // Показываем сообщение
+        } else {
+            nameInput.classList.remove('is-invalid');  // Убираем класс
+            nameWarning.style.display = 'none';  // Скрываем сообщение
+        }
+        validateForm(); // Проверяем форму после ввода
+    });
+
+    // Проверка для поля "Краткое описание"
+    descriptionInput.addEventListener('input', function() {
+        const maxLength = 80;
+        if (descriptionInput.value.length > maxLength) {
+            descriptionInput.classList.add('is-invalid');  // Добавляем класс для красной рамки
+            descriptionWarning.style.display = 'block';  // Показываем сообщение
+        } else {
+            descriptionInput.classList.remove('is-invalid');  // Убираем класс
+            descriptionWarning.style.display = 'none';  // Скрываем сообщение
+        }
+        validateForm(); // Проверяем форму после ввода
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,219 @@
+
+{% extends "base.html" %}
+{% block title %}Тикеты{% endblock %}
+
+{% block content %}
+<h2 class="text-white">Тикеты</h2>
+<div class="d-flex gap-3">
+    <a href="{% url 'ticket_create' %}" class="mb-2 d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3" style="max-width: 250px; height: 40px; background-color: rgb(174, 253, 227)">Создать тикет</a>
+    {% if '/ticket_closed/' in request.path %}
+        <a href="{% url 'ticket_list' %}" class="mb-2 d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3 bg-light" style="max-width: 250px; height: 40px;">Открытые тикеты</a>
+    {% else %} 
+        <a href="{% url 'ticket_closed' %}" class="mb-2 d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3" style="max-width: 250px; height: 40px; background-color: #fdd4ae">Закрытые тикеты</a>
+    {% endif %}
+</div>
+<!-- Контейнер с тикетами -->
+<div class="d-flex overflow-auto gap-3 mt-2 p-3 rounded-4" style="width: 75vw; box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2); background-color: #8f9db9;">
+    {% for ticket in tickets %}
+    <div class="p-3 small rounded-4 shadow-sm" style="min-width: 400px; max-width: 400px; height: 600px; display: inline-block; background-color: rgb(243, 249, 255);">
+        <p class="text-center"><strong>{{ ticket.name }}</strong></p>
+        <div class="card-body d-flex flex-column">
+            <h6 class="card-title d-flex justify-content-between align-items-center">
+                <span>
+                    Статус: 
+                    {% if ticket.status == 'open' %}
+                        <span class="text-success">Открыт 🟢</span>
+                    {% else %}
+                        <span class="text-danger">Закрыт 🔴</span>
+                    {% endif %}
+                </span>
+                {% if user.is_superuser %}
+                    {% if ticket.status == 'open' %}
+                        <a href="{% url 'change_ticket_status' ticket.id %}?redirect_to=ticket_list" class="btn-warning btn btn-sm rounded-5 shadow-sm">Закрыть тикет</a>
+                    {% else %}
+                        <a href="{% url 'change_ticket_status' ticket.id %}?redirect_to=ticket_closed" class="btn-success btn btn-sm rounded-5 shadow-sm">Открыть тикет</a>
+                    {% endif %}
+                {% endif %}
+                {% if not user.is_superuser %}
+                    <button 
+                        type="button" 
+                        class="btn btn-danger btn-sm rounded-5 shadow-sm" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deleteModal{{ ticket.id }}"
+                        onclick="event.stopPropagation();"> <!-- Остановить всплытие события -->
+                        Удалить тикет
+                    </button>
+                {% endif %}
+            </h6>
+            <div class="d-flex gap-3" style="justify-content: flex-end;">
+            {% if user.is_superuser %}
+                <button 
+                    type="button" 
+                    class="btn btn-danger btn-sm rounded-5 shadow-sm mt-2" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#deleteModal{{ ticket.id }}"
+                    onclick="event.stopPropagation();"> <!-- Остановить всплытие события -->
+                    Удалить тикет
+                </button>
+            {% endif %}
+            </div>
+            {% if user.is_superuser %}
+                <span class="card-text mt-2"><strong>Владелец:</strong></sp>
+                <span style="line-height: 0.1em; white-space: nowrap;">{{ ticket.owner.get_full_name }}</span>
+            {% endif %}
+            <div>
+                <span class="card-text mt-2"><strong>Создан:</strong></span>
+                <span style="line-height: 0.1em;">{{ ticket.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+            <div>
+                <span class="card-text mt-2"><strong>Описание:</strong></span>
+                <span style="white-space: normal; overflow-wrap: break-word;">{{ ticket.description|truncatechars:80  }}</span>  <!-- Выводим описание тикета -->
+            </div>
+    
+            
+            <!-- Сообщения с вертикальной прокруткой -->
+            <div class="flex-grow-1 overflow-auto mt-2 border rounded-4 bg-white" style="height: 290px; padding: 0.5rem;">
+                {% for message in ticket.messages.all %}
+                <div>
+                    <p style="margin-bottom: -3px;"><small class="text-muted">{{ message.created_at|date:"d.m.Y H:i" }}</small></p>
+                    <strong>{{ message.user.get_full_name }}</strong>:
+                    <p>{{ message.content }}</p>
+                </div>
+                {% empty %}
+                <p>Сообщений нет</p>
+                {% endfor %}
+            </div>
+
+            <!-- Форма отправки сообщения -->
+            {% if ticket.status == 'open' %}
+                <form method="post" class="mt-2 message-form" data-ticket-id="{{ ticket.id }}">
+                    {% csrf_token %}
+                    <textarea name="message" class="form-control message-input rounded-4" rows="2" placeholder="Введите сообщение"></textarea>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <!-- Модальное окно -->
+    <div 
+    class="modal fade" 
+    id="deleteModal{{ ticket.id }}" 
+    tabindex="-1" 
+    aria-labelledby="deleteModalLabel{{ ticket.id }}" 
+    aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel{{ ticket.id }}">Подтверждение удаления</h5>
+                    <button 
+                        type="button" 
+                        class="btn-close" 
+                        data-bs-dismiss="modal" 
+                        aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите удалить тикет <strong>{{ ticket.name }}</strong>?
+                </div>
+                <div class="modal-footer">
+                    <button 
+                        type="button" 
+                        class="btn btn-secondary rounded-5" 
+                        data-bs-dismiss="modal">Отмена</button>
+                    <!-- Форма для удаления тикета -->
+                    <form 
+                        action="{% url 'delete_ticket' ticket.id %}" 
+                        method="post" 
+                        class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger rounded-5">Удалить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const messageForms = document.querySelectorAll('.message-form');
+
+    // Прокрутка сообщений к последнему
+    const scrollToBottom = (container) => {
+        container.scrollTop = container.scrollHeight;
+    };
+
+    document.querySelectorAll('.flex-grow-1').forEach(container => {
+        scrollToBottom(container);
+    });
+
+    messageForms.forEach(form => {
+        const textarea = form.querySelector('.message-input');
+        const messagesContainer = form.parentElement.querySelector('.flex-grow-1');
+        const ticketId = form.dataset.ticketId;
+
+        // Отправка запроса на сервер для пометки тикета как прочитанного
+        const markAsRead = () => {
+            fetch(`/tickets/${ticketId}/mark_as_read/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Тикет помечен как прочитанный');
+                } else {
+                    console.error('Ошибка при пометке тикета:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка сети:', error);
+            });
+        };
+
+        // Добавляем обработчик клика на карточку тикета
+        form.parentElement.parentElement.addEventListener('click', markAsRead);
+
+        textarea.addEventListener('keydown', function (event) {
+            if (event.ctrlKey && event.key === 'Enter') {
+                event.preventDefault();
+                const message = textarea.value.trim();
+
+                if (message) {
+                    fetch(`/tickets/${ticketId}/send_message/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ content: message }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            messagesContainer.innerHTML += `
+                                <div>
+                                    <p style="margin-bottom: -3px;"><small class="text-muted">${data.created_at}</small></p>
+                                    <strong>${data.user}</strong>:
+                                    <p>${data.content}</p>
+                                </div>
+                            `;
+                            textarea.value = ''; // Очищаем текстовое поле
+                            scrollToBottom(messagesContainer); // Прокрутка вниз
+                        } else {
+                            console.error('Ошибка при отправке сообщения:', data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка сети:', error);
+                    });
+                }
+            }
+        });
+    });
+});
+
+</script>
+
+{% endblock %}

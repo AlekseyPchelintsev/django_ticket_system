@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+Редактирование профиля
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white">Редактирование профиля</h2>
+<form id="editProfileForm" method="post">
+    {% csrf_token %}
+    <div class="d-flex gap-3">
+        <button id="saveButton" type="submit" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3 button-disabled_style" disabled style="max-width: 250px; height: 40px; background-color: #aefde3">Сохранить</button>
+        <a href="{% url 'profile' %}" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3 bg-light" style="max-width: 250px; height: 40px;">Назад</a>
+    </div>
+    <div class="p-4 small rounded-4 shadow mt-3 bg-white" style="max-width: 400px;">
+        <!-- Поле Имя -->
+        <div class="form-group mb-3">
+            <label for="id_first_name">Имя</label>
+            <span id="firstNameWarning" class="text-danger" style="display: none;">Имя обязательно и не должно превышать 25 символов.</span>
+            {{ form.first_name|add_class:"form-control" }}
+        </div>
+        <!-- Поле Фамилия -->
+        <div class="form-group mb-3">
+            <label for="id_last_name">Фамилия</label>
+            <span id="lastNameWarning" class="text-danger" style="display: none;">Фамилия не должна превышать 30 символов.</span>
+            {{ form.last_name|add_class:"form-control" }}
+        </div>
+        <!-- Поле Email -->
+        <div class="form-group mb-3">
+            <label for="id_email">Электронная почта</label>
+            <span id="emailWarning" class="text-danger" style="display: none;">Введите корректный адрес электронной почты.</span>
+            {{ form.email|add_class:"form-control" }}
+        </div>
+    </div>
+</form>
+
+
+<style>
+  .button-disabled_style {
+    background-color: #d3d3d3 !important;
+    color: #929292 !important;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  const fields = ['first_name', 'last_name', 'email'];
+  const saveButton = document.getElementById('saveButton');
+
+  function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  function validateForm() {
+    const firstName = document.getElementById('id_first_name').value;
+    const lastName = document.getElementById('id_last_name').value;
+    const email = document.getElementById('id_email').value;
+
+    const isFirstNameValid = firstName.length > 0 && firstName.length <= 25;
+    const isLastNameValid = lastName.length <= 30;
+    const isEmailValid = validateEmail(email);
+
+    document.getElementById('firstNameWarning').style.display = isFirstNameValid ? 'none' : 'block';
+    document.getElementById('lastNameWarning').style.display = isLastNameValid ? 'none' : 'block';
+    document.getElementById('emailWarning').style.display = isEmailValid ? 'none' : 'block';
+
+    const isFormValid = isFirstNameValid && isLastNameValid && isEmailValid;
+    saveButton.disabled = !isFormValid;
+    saveButton.classList.toggle('button-disabled_style', !isFormValid);
+  }
+
+  function setupValidation(input, validator, warningElement) {
+    input.addEventListener('input', () => {
+      if (validator(input.value)) {
+        input.classList.remove('is-invalid');
+        warningElement.style.display = 'none';
+      } else {
+        input.classList.add('is-invalid');
+        warningElement.style.display = 'block';
+      }
+      validateForm();
+    });
+  }
+
+  // Настройка валидаторов для каждого поля
+  setupValidation(document.getElementById('id_first_name'), (value) => value.length > 0 && value.length <= 25, document.getElementById('firstNameWarning'));
+  setupValidation(document.getElementById('id_last_name'), (value) => value.length <= 30, document.getElementById('lastNameWarning'));
+  setupValidation(document.getElementById('id_email'), validateEmail, document.getElementById('emailWarning'));
+
+  // Проверка формы при загрузке страницы
+  document.addEventListener('DOMContentLoaded', validateForm);
+</script>
+{% endblock %}

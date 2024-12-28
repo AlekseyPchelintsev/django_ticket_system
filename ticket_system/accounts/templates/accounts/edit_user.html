@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+Редактирование пользователя
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white">Редактирование пользователя</h2>
+<form method="post">
+    {% csrf_token %}
+    <div class="d-flex gap-3">
+        <button type="submit" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3" style="max-width: 250px; height: 40px; background-color: #aefde3">Сохранить</button>
+        <a href="{% url 'users' %}" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3 bg-light" style="max-width: 250px; height: 40px;">Назад</a>
+    </div>
+    <div class="p-4 small rounded-4 shadow mt-3 bg-white" style="max-width: 400px;">
+        <div class="form-group mb-3">
+            <label for="id_first_name">Имя</label>
+            {{ form.first_name|add_class:"form-control" }}
+            {% if form.first_name.errors %}
+                <ul class="errorlist">
+                    {% for error in form.first_name.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <div class="form-group mb-3">
+            <label for="id_last_name">Фамилия</label>
+            {{ form.last_name|add_class:"form-control" }}
+            {% if form.last_name.errors %}
+                <ul class="errorlist">
+                    {% for error in form.last_name.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <div class="form-group mb-3">
+            <label for="id_email">Электронная почта</label>
+            {{ form.email|add_class:"form-control" }}
+            {% if form.email.errors %}
+                <ul class="errorlist">
+                    {% for error in form.email.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <div class="form-group mb-3">
+            <label for="id_role">Роль</label>
+            {{ form.role|add_class:"form-control" }}
+        </div>
+        <div class="form-group mb-3">
+            <label for="id_is_superuser">sudo?</label>
+            {{ form.is_superuser|add_class:"form-check-input" }}
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="id_new_password">Новый пароль</label>
+            {{ form.new_password|add_class:"form-control" }}
+            <p class="form-text text-muted">
+                Если поле пустое, пароль останется без изменений.
+            </p>
+        </div>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% load static %}
+{% load django_bootstrap5 %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Tickets land{% endblock %}</title>
+    {% bootstrap_css %}
+</head>
+<body class="d-flex flex-column min-vh-100" style="background-color: #A0AECD;">
+    <div class="container mt-4">
+      <div class="d-flex gap-5" style="justify-content: space-between;">
+        {% if not '/login/' in request.path and not '/register/' in request.path %}
+        <div class="d-flex flex-column nav nav-pills nav-fill gap-2 p-1 small" style="min-width: 200px; max-height: 180px;">
+          <a href="{% url 'profile' %}" class="d-flex justify-content-center align-items-center nav-link shadow-sm text-primary {% if '/profile/' in request.path %}bg-primary text-white{% endif %} rounded-5" style="max-height: 40px; background-color: #f8f9fa;">Профиль</a>
+          <a href="{% url 'ticket_list' %}" class="d-flex justify-content-center align-items-center nav-link shadow-sm rounded-5 text-primary {% if '/tickets/' in request.path %}bg-primary text-white{% endif %}" style="max-height: 40px; background-color: #f8f9fa;">Тикеты</a>
+          {% if user.role == 'admin' %}
+              <a href="{% url 'users' %}" class="d-flex justify-content-center align-items-center nav-link shadow-sm text-primary {% if '/users/' in request.path %}bg-primary text-white{% endif %} rounded-5" style="max-height: 40px; background-color: #f8f9fa;">Пользователи</a>
+          {% endif %}
+          <form action="{% url 'logout' %}" method="post" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="d-flex justify-content-center align-items-center nav-link rounded-5 bg-light shadow-sm" style="border: none;  width: 100%;" style="max-height: 40px;">Выход</button>
+          </form>
+          {% endif %}
+        </div>
+        <div  style="width: 100%;">
+          <!-- Основной контент -->
+          <main>{% block content %}{% endblock %}</main>
+        </div>
+      </div>
+    </div>
+
+    <footer class="text-center mt-auto text-white">
+        <p>&copy; 2025 Tickets</p>
+    </footer>
+    {% bootstrap_javascript %}
+</body>
+</html>

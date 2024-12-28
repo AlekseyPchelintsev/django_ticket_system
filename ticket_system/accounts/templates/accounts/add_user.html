@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+Добавление пользователя
+{% endblock %}
+
+{% block content %}
+<h2 class="text-white">Добавление пользователя</h2>
+<form method="post">
+    <div class="d-flex gap-3">
+        <button id="addUserButton" type="submit" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3 button-disabled_style" disabled style="max-width: 250px; height: 40px; background-color: #aefde3">Добавить пользователя</button>
+        <a href="{% url 'users' %}" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3 bg-light" style="max-width: 250px; height: 40px;">Назад</a>
+    </div>
+    <div class="p-4 small rounded-4 shadow mt-3 bg-white" style="max-width: 400px;">
+        {% csrf_token %}
+        <div class="form-group mb-3">
+            <label for="id_email">Электронная почта</label>
+            <span id="emailWarning" class="text-danger" style="display: none;">Введите корректный адрес электронной почты.</span>
+            {{ form.email|add_class:"form-control" }}
+        </div>
+        <div class="form-group mb-3">
+            <label for="id_first_name">Имя</label>
+            <span id="firstNameWarning" class="text-danger" style="display: none;">Имя не должно превышать 25 символов.</span>
+            {{ form.first_name|add_class:"form-control" }}
+        </div>
+        <div class="form-group mb-3">
+            <label for="id_last_name">Фамилия</label>
+            <span id="lastNameWarning" class="text-danger" style="display: none;">Фамилия не должна превышать 30 символов.</span>
+            {{ form.last_name|add_class:"form-control" }}
+        </div>
+        <div class="form-group mb-3">
+            <label for="id_password">Пароль</label>
+            <span id="passwordWarning" class="text-danger" style="display: none;">Пароль должен быть не менее 8 символов.</span>
+            {{ form.password|add_class:"form-control" }}
+        </div>
+    </div>
+</form>
+
+<style>
+  .button-disabled_style {
+    background-color: #d3d3d3 !important;
+    color: #929292 !important;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  const emailInput = document.getElementById('id_email');
+  const firstNameInput = document.getElementById('id_first_name');
+  const lastNameInput = document.getElementById('id_last_name');
+  const passwordInput = document.getElementById('id_password');
+  const addUserButton = document.getElementById('addUserButton');
+
+  function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  function validateForm() {
+    const isEmailValid = validateEmail(emailInput.value);
+    const isFirstNameValid = firstNameInput.value.length > 0 && firstNameInput.value.length <= 25;
+    const isLastNameValid = lastNameInput.value.length > 0 && lastNameInput.value.length <= 30;
+    const isPasswordValid = passwordInput.value.length >= 8;
+
+    addUserButton.disabled = !(isEmailValid && isFirstNameValid && isLastNameValid && isPasswordValid);
+    addUserButton.classList.toggle('button-disabled_style', addUserButton.disabled);
+  }
+
+  function setupValidation(input, validator, warningElement) {
+    input.addEventListener('input', () => {
+      if (validator(input.value)) {
+        input.classList.remove('is-invalid');
+        warningElement.style.display = 'none';
+      } else {
+        input.classList.add('is-invalid');
+        warningElement.style.display = 'block';
+      }
+      validateForm();
+    });
+  }
+
+  // Установка валидаторов
+  setupValidation(emailInput, validateEmail, document.getElementById('emailWarning'));
+  setupValidation(firstNameInput, (value) => value.length > 0 && value.length <= 25, document.getElementById('firstNameWarning'));
+  setupValidation(lastNameInput, (value) => value.length > 0 && value.length <= 30, document.getElementById('lastNameWarning'));
+  setupValidation(passwordInput, (value) => value.length >= 8, document.getElementById('passwordWarning'));
+</script>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center flex-column">
+  <h2 class="text-center text-white">Вход</h2>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mt-2 ap-2 p-4 small rounded-4 shadow" style="min-width: 300px; background-color: rgb(243, 249, 255);">
+        <div class="form-group mb-3">
+          <label for="id_username">Электронная почта</label>
+          {{ form.username|add_class:"form-control" }}
+        </div>
+        <div class="form-group mb-3">
+          <label for="id_password">Пароль</label>
+          {{ form.password|add_class:"form-control" }}
+        </div>
+      </div>
+      <div class="d-flex flex-column gap-3 mt-3" style="margin: auto;">
+        <button type="submit" class="btn rounded-5 shadow-sm" style="background-color: #aefde3">Войти</button>
+        <a href="{% url 'register' %}" class="btn rounded-5 shadow-sm bg-light" style="height: 40px;">Зарегистрироваться</a>
+      </div>
+    </form>
+</div>
+{% endblock %}
