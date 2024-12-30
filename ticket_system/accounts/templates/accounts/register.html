@@ -31,6 +31,7 @@
       <div class="form-group mb-3">
         <label for="id_password1">Пароль</label>
         <span id="password1Warning" class="text-danger" style="display: none;">Пароль должен быть не менее 8 символов.</span>
+        <span id="passwordStrengthWarning" class="text-danger" style="display: none; word-wrap: break-word; max-width: 350px">Пароль должен содержать хотя бы одну букву, одну цифру и один специальный символ.</span>
         {{ form.password1|add_class:"form-control" }}
       </div>
       <!-- Подтверждение пароля -->
@@ -56,6 +57,7 @@
 </style>
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
   const emailInput = document.getElementById('id_email');
   const firstNameInput = document.getElementById('id_first_name');
   const lastNameInput = document.getElementById('id_last_name');
@@ -63,45 +65,67 @@
   const password2Input = document.getElementById('id_password2');
   const registerButton = document.getElementById('registerButton');
 
+  const passwordStrengthRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+
+  // Проверка email
   function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
-  function validateForm() {
-    const isEmailValid = validateEmail(emailInput.value);
-    const isFirstNameValid = firstNameInput.value.length > 0 && firstNameInput.value.length <= 25;
-    const isLastNameValid = lastNameInput.value.length > 0 && lastNameInput.value.length <= 30;
-    const isPassword1Valid = password1Input.value.length >= 8;
-    const isPassword2Valid = password1Input.value === password2Input.value;
-
-    registerButton.disabled = !(isEmailValid && isFirstNameValid && isLastNameValid && isPassword1Valid && isPassword2Valid);
-    registerButton.classList.toggle('button-disabled_style', registerButton.disabled);
+  // Проверка сложности пароля
+  function validatePasswordStrength(password) {
+    return passwordStrengthRegex.test(password);
   }
 
+  // Установка валидаторов
   function setupValidation(input, validator, warningElement) {
     input.addEventListener('input', () => {
-      if (validator(input.value)) {
-        input.classList.remove('is-invalid');
-        warningElement.style.display = 'none';
-      } else {
-        input.classList.add('is-invalid');
-        warningElement.style.display = 'block';
-      }
+      const isValid = validator(input.value);
+      input.classList.toggle('is-invalid', !isValid);
+      warningElement.style.display = isValid ? 'none' : 'block';
       validateForm();
     });
   }
 
-  // Установка валидаторов
+  // Главная проверка формы
+  function validateForm() {
+  const isEmailValid = validateEmail(emailInput.value);
+  const isFirstNameValid = firstNameInput.value.length > 0 && firstNameInput.value.length <= 25;
+  const isLastNameValid = lastNameInput.value.length > 0 && lastNameInput.value.length <= 30;
+  const isPassword1Valid = password1Input.value.length >= 8 && validatePasswordStrength(password1Input.value); // Проверка длины и сложности
+  const isPassword2Valid = password1Input.value === password2Input.value; // Совпадение паролей
+
+  // Управление кнопкой регистрации
+  registerButton.disabled = !(isEmailValid && isFirstNameValid && isLastNameValid && isPassword1Valid && isPassword2Valid);
+  registerButton.classList.toggle('button-disabled_style', registerButton.disabled);
+}
+
+  // Установка валидаторов на поля
   setupValidation(emailInput, validateEmail, document.getElementById('emailWarning'));
   setupValidation(firstNameInput, (value) => value.length > 0 && value.length <= 25, document.getElementById('firstNameWarning'));
   setupValidation(lastNameInput, (value) => value.length > 0 && value.length <= 30, document.getElementById('lastNameWarning'));
-  setupValidation(password1Input, (value) => value.length >= 8, document.getElementById('password1Warning'));
+
+  // Валидация пароля
+// Валидация пароля с учётом длины и сложности
+setupValidation(password1Input, (value) => {
+  const isValidLength = value.length >= 8; // Проверка длины
+  const isValidStrength = validatePasswordStrength(value); // Проверка сложности
+
+  // Отображение предупреждений
+  document.getElementById('password1Warning').style.display = isValidLength ? 'none' : 'block'; // Предупреждение о длине
+  document.getElementById('passwordStrengthWarning').style.display = isValidStrength ? 'none' : 'block'; // Предупреждение о сложности
+
+  // Пароль считается валидным, если оба условия выполнены
+  return isValidLength && isValidStrength;
+}, null);
+
   password2Input.addEventListener('input', () => {
     const isPassword2Valid = password1Input.value === password2Input.value;
     password2Input.classList.toggle('is-invalid', !isPassword2Valid);
     document.getElementById('password2Warning').style.display = isPassword2Valid ? 'none' : 'block';
     validateForm();
   });
+});
 </script>
 {% endblock %}
