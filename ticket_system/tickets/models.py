@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.utils.timezone import now
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 User = get_user_model()
 
@@ -37,3 +39,10 @@ class Message(models.Model):
     content = models.TextField(verbose_name="Сообщение")
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    
+
+@receiver(post_save, sender=Message)
+def update_ticket_updated_at(sender, instance, **kwargs):
+    # Обновляем поле updated_at у тикета, к которому принадлежит сообщение
+    instance.ticket.updated_at = timezone.now()
+    instance.ticket.save()

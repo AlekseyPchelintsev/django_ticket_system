@@ -74,7 +74,10 @@
     
             
             <!-- Сообщения с вертикальной прокруткой -->
-            <div class="flex-grow-1 overflow-auto mt-2 border rounded-4 bg-white" style="height: 290px; padding: 0.5rem;">
+            <div 
+                class="flex-grow-1 overflow-auto mt-2 border rounded-4 bg-white message-container" 
+                style="height: 290px; padding: 0.5rem;" 
+                data-ticket-id="{{ ticket.id }}">
                 {% for message in ticket.messages.all %}
                 <div>
                     <p style="margin-bottom: -3px;"><small class="text-muted">{{ message.created_at|date:"d.m.Y H:i" }}</small></p>
@@ -88,11 +91,11 @@
 
             <!-- Форма отправки сообщения -->
             {% if ticket.status == 'open' %}
-                <form method="post" class="mt-2 message-form text-end" data-ticket-id="{{ ticket.id }}">
-                    {% csrf_token %}
-                    <textarea name="message" class="form-control message-input rounded-4" rows="2" placeholder="Введите сообщение"></textarea>
-                    <button type="submit" class="btn btn-primary rounded-5 mt-2">Отправить</button>
-                </form>
+            <form method="post" class="mt-2 message-form text-end" data-ticket-id="{{ ticket.id }}">
+                {% csrf_token %}
+                <textarea name="message" class="form-control message-input rounded-4" rows="2" placeholder="Введите сообщение"></textarea>
+                <button type="button" class="btn btn-primary rounded-5 mt-2 send-button">Отправить</button>
+            </form>
             {% endif %}
         </div>
     </div>
@@ -139,84 +142,84 @@
     document.addEventListener('DOMContentLoaded', function () {
     const messageForms = document.querySelectorAll('.message-form');
 
-    // Прокрутка сообщений к последнему
+    // Функция для прокрутки контейнера вниз
     const scrollToBottom = (container) => {
-        container.scrollTop = container.scrollHeight;
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
     };
 
-    document.querySelectorAll('.flex-grow-1').forEach(container => {
+    // Получаем все контейнеры сообщений
+    const messageContainers = document.querySelectorAll('.message-container');
+
+    // Прокручиваем каждый контейнер вниз при загрузке
+    messageContainers.forEach(container => {
         scrollToBottom(container);
     });
 
+    //const moveTicketToTop = (ticketId) => {
+    //    const ticketCard = document.querySelector(`[data-ticket-id="${ticketId}"]`).closest('.p-3');
+    //    if (ticketCard) {
+    //        const ticketContainer = ticketCard.parentElement;
+    //        ticketContainer.prepend(ticketCard);
+    //    }
+    //};
+
     messageForms.forEach(form => {
         const textarea = form.querySelector('.message-input');
+        const sendButton = form.querySelector('.send-button'); // Добавляем кнопку отправки
         const messagesContainer = form.parentElement.querySelector('.flex-grow-1');
         const ticketId = form.dataset.ticketId;
 
-        // Отправка запроса на сервер для пометки тикета как прочитанного
-        const markAsRead = () => {
-            fetch(`/tickets/${ticketId}/mark_as_read/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('Тикет помечен как прочитанный');
-                } else {
-                    console.error('Ошибка при пометке тикета:', data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка сети:', error);
-            });
+        // Функция отправки сообщения
+        const sendMessage = () => {
+            const message = textarea.value.trim();
+            if (message) {
+                fetch(`/tickets/${ticketId}/send_message/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content: message }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        messagesContainer.innerHTML += `
+                            <div>
+                                <p style="margin-bottom: -3px;"><small class="text-muted">${data.created_at}</small></p>
+                                <strong>${data.user}</strong>:
+                                <p>${data.content}</p>
+                            </div>
+                        `;
+                        textarea.value = ''; // Очищаем текстовое поле
+                        scrollToBottom(messagesContainer); // Прокрутка вниз
+                        moveTicketToTop(ticketId); // Перемещаем тикет в начало списка
+                    } else {
+                        console.error('Ошибка при отправке сообщения:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка сети:', error);
+                });
+            }
         };
 
-        // Добавляем обработчик клика на карточку тикета
-        form.parentElement.parentElement.addEventListener('click', markAsRead);
-
+        // Обработчик для клавиатуры (Ctrl + Enter)
         textarea.addEventListener('keydown', function (event) {
             if (event.ctrlKey && event.key === 'Enter') {
                 event.preventDefault();
-                const message = textarea.value.trim();
-
-                if (message) {
-                    fetch(`/tickets/${ticketId}/send_message/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}',
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ content: message }),
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            messagesContainer.innerHTML += `
-                                <div>
-                                    <p style="margin-bottom: -3px;"><small class="text-muted">${data.created_at}</small></p>
-                                    <strong>${data.user}</strong>:
-                                    <p>${data.content}</p>
-                                </div>
-                            `;
-                            textarea.value = ''; // Очищаем текстовое поле
-                            scrollToBottom(messagesContainer); // Прокрутка вниз
-                        } else {
-                            console.error('Ошибка при отправке сообщения:', data.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Ошибка сети:', error);
-                    });
-                }
+                sendMessage();
             }
+        });
+
+        // Обработчик для кнопки отправки
+        sendButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            sendMessage();
         });
     });
 });
-
 </script>
-
 {% endblock %}

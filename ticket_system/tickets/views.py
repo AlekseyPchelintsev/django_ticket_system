@@ -13,11 +13,11 @@ def ticket_list(request):
     if request.user.role == 'admin':
         tickets = Ticket.objects.filter(status='open').annotate(
             new_messages=Count('messages', filter=Q(messages__is_read=False))
-        ).order_by('-created_at')
+        ).order_by('-updated_at')  # Сортировка по обновлению
     else:
         tickets = Ticket.objects.filter(owner=request.user, status='open').annotate(
             new_messages=Count('messages', filter=Q(messages__is_read=False))
-        ).order_by('-created_at')
+        ).order_by('-updated_at')  # Сортировка по обновлению
 
     return render(request, 'tickets/ticket_list.html', {'tickets': tickets})
 
@@ -66,7 +66,7 @@ def delete_ticket(request, pk):
     return render(request, 'tickets/delete_ticket_confirm.html', {'ticket': ticket})
 
 
-@csrf_exempt  # Убедитесь, что CSRF-токен проверяется, если это необходимо
+@csrf_exempt
 def send_message(request, ticket_id):
     if request.method == 'POST':
         try:
