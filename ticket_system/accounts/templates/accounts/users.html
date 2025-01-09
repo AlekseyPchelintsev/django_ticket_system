@@ -17,7 +17,7 @@
                 <strong>Фамилия:</strong> {{ user.last_name }} <br>
                 <strong>Роль:</strong> {{ user.get_role_display }}
             </div>
-            <div>
+            <div class="users-buttons">
                 <a href="{% url 'edit_user' user.id %}" class="btn btn-primary btn-sm rounded-5 shadow-sm">Редактировать</a>
                 <button 
                     type="button" 
@@ -67,4 +67,14 @@
         {% endfor %}
     </div>
 </div>
+<style>
+    @media (max-width: 991px) {
+        .users-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    }
+    
+</style>
 {% endblock %}

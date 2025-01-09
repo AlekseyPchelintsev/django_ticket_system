@@ -10,11 +10,11 @@
     <a href="{% url 'edit_profile' %}" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3" style="max-width: 250px; height: 40px; background-color: #aefde3">Изменить профиль</a>
     <a href="{% url 'change_password' %}" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3" style="max-width: 250px; height: 40px; background-color: #fdd4ae">Изменить пароль</a>
 </div>
-<div class="p-4 small rounded-4 shadow mt-3 bg-white" style="max-width: 1024px;">
-    <p>Имя: {{ user.first_name }}</p>
-    <p>Фамилия: {{ user.last_name }}</p>
-    <p>e-mail: {{ user.email }}</p>
-    <p>Дата регистрации: {{ user.date_joined|date:"d.m.Y" }}</p>
+<div class="p-4 small rounded-4 shadow mt-3 bg-white" style="max-width: 1024px; line-height: 2rem;">
+    <strong>Электронная почта:</strong> {{ user.email }} <br>
+    <strong>Имя:</strong> {{ user.first_name }} <br>
+    <strong>Фамилия:</strong> {{ user.last_name }} <br>
+    <strong>Дата регистрации:</strong> {{ user.date_joined|date:"d.m.Y" }}
 </div>
 {% endblock %}
 
