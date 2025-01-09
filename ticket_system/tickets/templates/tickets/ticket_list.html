@@ -13,9 +13,9 @@
     {% endif %}
 </div>
 <!-- Контейнер с тикетами -->
-<div class="d-flex overflow-auto gap-3 mt-2 p-3 rounded-4" style="width: 75vw; box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2); background-color: #8f9db9;">
+<div class="ticket-container mt-2 p-3 rounded-4" style="width: 75vw; box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2); background-color: #8f9db9; overflow-x: auto; overflow-y: hidden;">
     {% for ticket in tickets %}
-    <div class="p-3 small rounded-4 shadow-sm" style="min-width: 400px; max-width: 400px; height: 600px; display: inline-block; background-color: rgb(243, 249, 255);">
+    <div class="ticket-card p-3 small rounded-4 shadow-sm" style="min-width: 300px; max-width: 400px; background-color: rgb(243, 249, 255);">
         <div class="d-flex justify-content-center gap-2">
             <p class="text-center"><strong>{{ ticket.name }}</strong></p>
             <span>
@@ -138,6 +138,39 @@
     </div>
     {% endfor %}
 </div>
+
+<!-- Добавление медиазапросов для адаптивности -->
+<style>
+    /* Для мобильных устройств */
+    @media (max-width: 991px) {
+        .ticket-container {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            width: auto; /* Ширина под размер тикета */
+            max-width: 350px;
+            overflow-x: hidden; /* Убираем горизонтальную прокрутку */
+            overflow-y: auto; /* Вертикальная прокрутка */
+            gap: 1rem; /* Расстояние между тикетами */
+            padding: 1rem; /* Добавляем немного отступов */
+        }
+        .ticket-card {
+            min-width: 100%; /* Тикет растягивается на всю доступную ширину */
+            max-width: 100%; /* Тикет не выходит за пределы контейнера */
+        }
+    }
+
+    /* Для десктопов */
+    @media (min-width: 992px) {
+        .ticket-container {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto; /* Горизонтальная прокрутка только внутри контейнера */
+            gap: 1rem;
+            width: 75vw; /* Ширина контейнера 75% от экрана */
+        }
+    }
+</style>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
     const messageForms = document.querySelectorAll('.message-form');
