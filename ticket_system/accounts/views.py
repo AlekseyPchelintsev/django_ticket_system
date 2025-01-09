@@ -157,8 +157,8 @@ def add_user(request):
     if request.method == 'POST':
         form = AddUserForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('users')
+            form.save()  # Сохраняем форму
+            return redirect('users')  # Перенаправляем на список пользователей
     else:
         form = AddUserForm()
     return render(request, 'accounts/add_user.html', {'form': form})

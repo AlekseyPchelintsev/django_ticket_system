@@ -90,16 +90,17 @@ class UserEditForm(forms.ModelForm):
         if commit:
             user.save()
         return user
-        
+    
 
 class AddUserForm(forms.ModelForm):
     email = forms.EmailField(required=True)
     password = forms.CharField(widget=forms.PasswordInput, label='Пароль')
     username = forms.CharField(required=False)  # Добавляем поле username
+    role = forms.ChoiceField(choices=[('client', 'Клиент'), ('admin', 'Администратор')], required=False)
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'username', 'password']
+        fields = ['first_name', 'last_name', 'email', 'username', 'password', 'role']
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -108,6 +109,10 @@ class AddUserForm(forms.ModelForm):
         # Если поле username пустое, используем email в качестве username
         if not user.username:
             user.username = self.cleaned_data['email']
+
+        # Устанавливаем роль по умолчанию, если не указана
+        if not self.cleaned_data.get('role'):
+            user.role = 'client'  # Устанавливаем роль клиента по умолчанию
 
         if commit:
             user.save()

@@ -8,33 +8,37 @@
 {% block content %}
 <h2 class="text-white">Добавление пользователя</h2>
 <form method="post">
-    <div class="d-flex gap-3">
-        <button id="addUserButton" type="submit" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3 button-disabled_style" disabled style="max-width: 250px; height: 40px; background-color: #aefde3">Добавить пользователя</button>
-        <a href="{% url 'users' %}" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3 bg-light" style="max-width: 250px; height: 40px;">Назад</a>
-    </div>
-    <div class="p-4 small rounded-4 shadow mt-3 bg-white" style="max-width: 400px;">
-        {% csrf_token %}
-        <div class="form-group mb-3">
-            <label for="id_email">Электронная почта</label>
-            <span id="emailWarning" class="text-danger" style="display: none;">Введите корректный адрес электронной почты.</span>
-            {{ form.email|add_class:"form-control" }}
-        </div>
-        <div class="form-group mb-3">
-            <label for="id_first_name">Имя</label>
-            <span id="firstNameWarning" class="text-danger" style="display: none;">Имя не должно превышать 25 символов.</span>
-            {{ form.first_name|add_class:"form-control" }}
-        </div>
-        <div class="form-group mb-3">
-            <label for="id_last_name">Фамилия</label>
-            <span id="lastNameWarning" class="text-danger" style="display: none;">Фамилия не должна превышать 30 символов.</span>
-            {{ form.last_name|add_class:"form-control" }}
-        </div>
-        <div class="form-group mb-3">
-            <label for="id_password">Пароль</label>
-            <span id="passwordWarning" class="text-danger" style="display: none;">Пароль должен быть не менее 8 символов.</span>
-            {{ form.password|add_class:"form-control" }}
-        </div>
-    </div>
+  <div class="d-flex gap-3">
+      <button type="submit" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3" style="max-width: 250px; height: 40px; background-color: #aefde3">Добавить пользователя</button>
+      <a href="{% url 'users' %}" class="d-flex justify-content-center align-items-center nav-link rounded-5 shadow-sm mt-2 p-3 bg-light" style="max-width: 250px; height: 40px;">Назад</a>
+  </div>
+  <div class="p-4 small rounded-4 shadow mt-3 bg-white" style="max-width: 400px;">
+      {% csrf_token %}
+      <div class="form-group mb-3">
+          <label for="id_first_name">Имя</label>
+          <span id="firstNameWarning" class="text-danger" style="display: none;">Имя не должно превышать 25 символов.</span>
+          {{ form.first_name|add_class:"form-control" }}
+      </div>
+      <div class="form-group mb-3">
+          <label for="id_last_name">Фамилия</label>
+          <span id="lastNameWarning" class="text-danger" style="display: none;">Фамилия не должна превышать 30 символов.</span>
+          {{ form.last_name|add_class:"form-control" }}
+      </div>
+      <div class="form-group mb-3">
+          <label for="id_email">Электронная почта</label>
+          <span id="emailWarning" class="text-danger" style="display: none;">Введите корректный адрес электронной почты.</span>
+          {{ form.email|add_class:"form-control" }}
+      </div>
+      <div class="form-group mb-3">
+        <label for="id_password">Пароль</label>
+        <span id="passwordWarning" class="text-danger" style="display: none;">Пароль должен быть не менее 8 символов.</span>
+        {{ form.password|add_class:"form-control" }}
+      </div>
+      <div class="form-group mb-3">
+          <label for="id_role">Роль</label>
+          {{ form.role|add_class:"form-control" }}
+      </div>
+  </div>
 </form>
 
 <style>
