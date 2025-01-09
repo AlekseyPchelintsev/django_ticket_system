@@ -12,7 +12,7 @@
 <body class="d-flex flex-column min-vh-100" style="background-color: #A0AECD;">
   <!-- Бургер-меню для мобильных устройств -->
   {% if not '/login/' in request.path and not '/register/' in request.path %}
-  <nav class="navbar navbar-expand-lg navbar-light bg-light d-lg-none">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light d-lg-none position-fixed top-0 w-100 z-index-1030">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Tickets.</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
