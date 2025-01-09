@@ -62,7 +62,7 @@
         {% endif %}
   
         <!-- Основной контент -->
-        <div class="margin-top-mobile responsive-container container mt-4 flex-grow-1 gap-3 {% if '/login/' in request.path or '/register/' in request.path %}justify-content-start align-items-center{% endif %}">
+        <div class="padding-top-mobile-h responsive-container container mt-4 flex-grow-1 gap-3 {% if '/login/' in request.path or '/register/' in request.path %}justify-content-start align-items-center{% endif %}">
           <main>{% block content %}{% endblock %}</main>
         </div>
     </div>
